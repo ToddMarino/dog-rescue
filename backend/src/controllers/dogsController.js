@@ -1,5 +1,11 @@
 import { pool } from '../db/pool.js';
-import { sql, sqlById, buildDogCreate } from '../queries/dogQueries.js';
+import {
+  sql,
+  sqlById,
+  buildDogCreate,
+  updateDog,
+  sqlDeleteDog,
+} from '../queries/dogQueries.js';
 
 // GET - Get All Dogs
 // Public Access - /Dogs
@@ -118,7 +124,7 @@ export const createDog = async (req, res) => {
         await client.query(
           `INSERT INTO dog_breeds (dog_id, breed_id, primary_breed)
            VALUES ($1, $2, $3)`,
-          [dogId, breed.breed_id, breed.primary_breed]
+          [dogId, breed.breed_id, breed.primary_breed],
         );
       }
     }
@@ -135,7 +141,7 @@ export const createDog = async (req, res) => {
         await client.query(
           `INSERT INTO behavior (dog_id, tag_id)
            VALUES ($1, $2)`,
-          [dogId, tag.tag_id]
+          [dogId, tag.tag_id],
         );
       }
     }
@@ -157,7 +163,6 @@ export const createDog = async (req, res) => {
     //    or fetch the new dog immediately.
     // ------------------------------------------------------------
     res.status(201).json({ dog_id: dogId });
-
   } catch (err) {
     // ------------------------------------------------------------
     // 8) If ANYTHING above fails:
@@ -177,7 +182,6 @@ export const createDog = async (req, res) => {
       message: 'Failed to create new dog',
       code: 'DOG_POST_ERROR',
     });
-
   } finally {
     // ------------------------------------------------------------
     // 9) Release the database connection back to the pool.
@@ -187,3 +191,163 @@ export const createDog = async (req, res) => {
   }
 };
 
+// PATCH - Edit Existing Dog
+// Admin Access - /dogs/:id
+export const updateDog = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    const { id } = req.params;
+
+    const {
+      name,
+      gender_id,
+      size_id,
+      status_id,
+      intake_type_id,
+      current_location_id,
+      date_of_birth,
+      weight,
+      microchip_number,
+      intake_date,
+      estimated_age_years,
+      estimated_age_months,
+      breeds,
+      behavior_tags,
+    } = req.body;
+
+    // STEP 1: Build dynamic UPDATE for dogs table
+    const fields = [];
+    const values = [];
+    let index = 1;
+
+    if (name !== undefined) {
+      fields.push(`name = $${index++}`);
+      values.push(name);
+    }
+    if (gender_id !== undefined) {
+      fields.push(`gender_id = $${index++}`);
+      values.push(gender_id);
+    }
+    if (size_id !== undefined) {
+      fields.push(`size_id = $${index++}`);
+      values.push(size_id);
+    }
+    if (status_id !== undefined) {
+      fields.push(`status_id = $${index++}`);
+      values.push(status_id);
+    }
+    if (intake_type_id !== undefined) {
+      fields.push(`intake_type_id = $${index++}`);
+      values.push(intake_type_id);
+    }
+    if (current_location_id !== undefined) {
+      fields.push(`current_location_id = $${index++}`);
+      values.push(current_location_id);
+    }
+    if (date_of_birth !== undefined) {
+      fields.push(`date_of_birth = $${index++}`);
+      values.push(date_of_birth);
+    }
+    if (weight !== undefined) {
+      fields.push(`weight = $${index++}`);
+      values.push(weight);
+    }
+    if (microchip_number !== undefined) {
+      fields.push(`microchip_number = $${index++}`);
+      values.push(microchip_number);
+    }
+    if (intake_date !== undefined) {
+      fields.push(`intake_date = $${index++}`);
+      values.push(intake_date);
+    }
+    if (estimated_age_years !== undefined) {
+      fields.push(`estimated_age_years = $${index++}`);
+      values.push(estimated_age_years);
+    }
+    if (estimated_age_months !== undefined) {
+      fields.push(`estimated_age_months = $${index++}`);
+      values.push(estimated_age_months);
+    }
+
+    // Only run UPDATE if fields were provided
+    if (fields.length > 0) {
+      values.push(id);
+      const sql = `
+      UPDATE dogs
+      SET ${fields.join(', ')}
+      WHERE dog_id = $${index}
+      `;
+      await client.query(sql, values);
+    }
+
+    // STEP 2: Replace breeds if provided
+    if (Array.isArray(breeds)) {
+      await client.query(`DELETE FROM dog_breeds WHERE dog_id = $1`, [id]);
+
+      for (const breed of breeds) {
+        await client.query(
+          `INSERT INTO dog_breeds (dog_id, breed_id, primary_breed)
+          VALUES ($1, $2, $3)`,
+          [id, breed.breed_id, breed.primary_breed],
+        );
+      }
+    }
+
+    // STEP 3: Replace behaviors if provided
+    if (Array.isArray(behavior_tags)) {
+      await client.query(`DELETE FROM behavior WHERE dog_id = $1`, [id]);
+
+      for (const tag of behavior_tags) {
+        await client.query(
+          `INSERT INTO behavior (dog_id, tag_id)
+          VALUES ($1, $2)`,
+          [id, tag.tag_id],
+        );
+      }
+    }
+
+    await client.query('COMMIT');
+
+    res.json({ updated: id });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('DOG_PATCH_ERROR', err);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to update dog',
+      code: 'DOG_PATCH_ERROR',
+    });
+  } finally {
+    client.release();
+  }
+};
+
+// DELETE - Delete Dog by ID
+// Admin Access - /dogs/:id
+export const deleteDog = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (isNaN(id)) {
+      return res.status(400).json({ message: 'Invalid dog ID' });
+    }
+
+    const result = await pool.query(sqlDeleteDog, [id]);
+
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Dog not found' });
+    }
+
+    res.json({ deleted: result.rows[0].dog_id });
+  } catch (err) {
+    console.error('DOG_DELETE_ERROR', err);
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to delete dog',
+      code: 'DOG_DELETE_ERROR',
+    });
+  }
+};

@@ -1,5 +1,5 @@
 // GET Dogs
-// public
+// Public
 export const buildDogSelect = (filter = '') => `
 SELECT
   d.dog_id,
@@ -65,9 +65,6 @@ ORDER BY
 d.dog_id;
   `;
 
-export const sql = buildDogSelect();
-export const sqlById = buildDogSelect('WHERE d.dog_id = $1');
-
 // POST Dogs
 // Admin
 export const buildDogCreate = `
@@ -92,3 +89,15 @@ export const buildDogCreate = `
 
     RETURNING dog_id;
 `;
+
+// DELETE Dog
+// Admin
+export const sqlDeleteDog = `
+  DELETE
+  FROM dogs d
+  WHERE dog_id = $1
+  RETURNING dog_id
+  `;
+
+export const sql = buildDogSelect();
+export const sqlById = buildDogSelect('WHERE d.dog_id = $1');
