@@ -1,6 +1,5 @@
 import express from 'express';
 import { getDogs, getDogById, createDog, deleteDog, updateDog } from '../controllers/dogsController.js';
-import { updateDog } from '../queries/dogQueries.js';
 
 const router = express.Router();
 

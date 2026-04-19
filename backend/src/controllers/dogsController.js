@@ -3,7 +3,6 @@ import {
   sql,
   sqlById,
   buildDogCreate,
-  updateDog,
   sqlDeleteDog,
 } from '../queries/dogQueries.js';
 
