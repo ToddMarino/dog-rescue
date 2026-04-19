@@ -140,3 +140,25 @@ export const login = async (req, res) => {
     return res.status(500).json({ message: 'Login failed' });
   }
 };
+
+
+// -------------------- User Access --------------------
+// Public Access - /auth/me
+export const me = async (req, res) => {
+  try {
+    // req.user was set by authMiddleware
+    const { user_id, email } = req.user;
+
+    return res.status(200).json({
+      user: {
+        user_id,
+        email
+      }
+    })
+  } catch (err) {
+    console.error('ME_ERROR', err);
+    return res.status(500).json({
+      message: 'Failed to fetch user'
+    })
+  }
+}
