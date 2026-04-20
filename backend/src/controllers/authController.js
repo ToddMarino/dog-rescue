@@ -63,11 +63,23 @@ export const signup = async (req, res) => {
       });
     }
 
-    // 4. insert new user email & password
+    // Prepare the password to be salted/encrypted
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
+    
+    // 4. insert new user email & encrypted password
+    const newUser = await client.query(sqlCreateUser, [email, hashedPassword]);
+    
+    // Here we automatically assign newUser the default role of 'User'
+    // Get the userId for the newUser
+    const userId = newUser.rows[0].user_id;
+    // Get the role_id for 'User'
+    const roleResult = await client.query(`SELECT role_id FROM role_types WHERE role_name = 'User'`);
+    const userRoleId = roleResult.rows[0].role_id;
 
-    await client.query(sqlCreateUser, [email, hashedPassword]);
+    // Assign the role of 'User' to the newUser
+    await client.query(assignUserApprovals, [userId, userRoleId]);
+
 
     // if all inserts work, commit the transaction
     await client.query('COMMIT');
