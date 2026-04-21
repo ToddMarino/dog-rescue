@@ -54,6 +54,84 @@ CREATE TABLE "user_approvals" (
     "approved_by" int REFERENCES users(user_id)
 );
 
+CREATE TABLE "role_default_approvals" (
+    "role_id" int REFERENCES role_types(role_id) ON DELETE CASCADE,
+    "approval_type_id" int REFERENCES approval_types(approval_type_id) ON DELETE CASCADE,
+    "updated_by" int REFERENCES users(user_id),
+    "updated_on" timestamp DEFAULT (NOW()),
+    PRIMARY KEY (role_id, approval_type_id)
+);
+
+-- Seeds Default Role Approvals
+-- Super Admin approved for all except Vet
+INSERT INTO
+    role_default_approvals(role_id, approval_type_id)
+SELECT
+    r.role_id,
+    a.approval_type_id
+FROM
+    role_types r
+    JOIN approval_types a ON TRUE
+WHERE
+    r.role_name = 'Super Admin'
+    AND a.approval_name != 'Approved Vet';
+
+-- Volunteer default approvals
+INSERT INTO
+    role_default_approvals(role_id, approval_type_id)
+SELECT
+    r.role_id,
+    a.approval_type_id
+FROM
+    role_types r
+    JOIN approval_types a ON a.approval_name IN ('Approved Volunteer', 'Approved Event Volunteer')
+WHERE
+    r.role_name = 'Volunteer';
+
+-- Employee default approvals
+INSERT INTO
+    role_default_approvals(role_id, approval_type_id)
+SELECT
+    r.role_id,
+    a.approval_type_id
+FROM
+    role_types r
+    JOIN approval_types a ON a.approval_name IN (
+        'Approved Volunteer',
+        'Approved Transporter',
+        'Approved Shelter Access'
+    )
+WHERE
+    r.role_name = 'Employee';
+
+-- Vet default approvals
+INSERT INTO
+    role_default_approvals(role_id, approval_type_id)
+SELECT
+    r.role_id,
+    a.approval_type_id
+FROM
+    role_types r
+    JOIN approval_types a ON a.approval_name IN ('Approved Vet', 'Approved Medical Handler')
+WHERE
+    r.role_name = 'Employee';
+
+-- Photographer/Media
+INSERT INTO
+    role_default_approvals(role_id, approval_type_id)
+SELECT
+    r.role_id,
+    a.approval_type_id
+FROM
+    role_types r
+    JOIN approval_types a ON a.approval_name IN (
+        'Approved Volunteer',
+        'Approved Event Volunteer',
+        'Approved Photographer'
+    )
+WHERE
+    r.role_name = 'Photographer/Media';
+
 -- States table seed
 INSERT INTO
     states (state_abbr)

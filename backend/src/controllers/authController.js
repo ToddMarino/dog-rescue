@@ -7,8 +7,10 @@ import {
   assignUserApprovals,
 } from '../queries/authQueries.js';
 
+// -----------------------------------------------------
 // -------------------- User SIGNUP --------------------
 // Public Access - /auth/signup
+// -----------------------------------------------------
 export const signup = async (req, res) => {
   const client = await pool.connect();
 
@@ -99,8 +101,10 @@ export const signup = async (req, res) => {
   }
 };
 
+// -----------------------------------------------------
 // -------------------- User LOGIN --------------------
 // User - /auth/login
+// -----------------------------------------------------
 
 export const login = async (req, res) => {
   try {
@@ -154,8 +158,10 @@ export const login = async (req, res) => {
 };
 
 
+// -----------------------------------------------------
 // -------------------- User Access --------------------
 // Public Access - /auth/me
+// -----------------------------------------------------
 export const me = async (req, res) => {
   try {
     // req.user was set by authMiddleware
