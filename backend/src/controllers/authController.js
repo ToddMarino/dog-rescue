@@ -80,7 +80,7 @@ export const signup = async (req, res) => {
     const userRoleId = roleResult.rows[0].role_id;
 
     // Assign the role of 'User' to the newUser
-    await client.query(assignUserApprovals, [userId, userRoleId]);
+    await client.query(assignUserRoles, [userId, userRoleId]);
 
 
     // if all inserts work, commit the transaction
