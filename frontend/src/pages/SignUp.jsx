@@ -1,9 +1,13 @@
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import api from '../api/axios';
 
 const SignUp = () => {
   const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const {
     register,
@@ -17,7 +21,7 @@ const SignUp = () => {
       await api.post('/auth/signup', {
         email: data.email,
         password: data.password,
-        confirmPassword: data.confirmPassword,
+        confirmedPassword: data.confirmPassword,
       });
 
       navigate('/signin');
@@ -60,7 +64,7 @@ const SignUp = () => {
           <span className='label-text'>Password</span>
         </label>
         <input
-          type='password'
+          type={showPassword ? "text" : "password" }
           id='password'
           className=' input input-bordered w-full'
           {...register('password', { required: 'Password is required' })}
@@ -76,7 +80,7 @@ const SignUp = () => {
           <span className='label-text'>Confirm Password</span>
         </label>
         <input
-          type='password'
+          type={showPassword ? "text" : "password" }
           id='confirmPassword'
           className=' input input-bordered w-full'
           {...register('confirmPassword', {
@@ -93,6 +97,16 @@ const SignUp = () => {
           </p>
         )}
       </div>
+
+      {/* Show Password Checkbox */}
+      <label className="label cursor-pointer mt-1">
+        <span className="label-text">Show Password</span>
+        <input
+          type='checkbox'
+          className='checkbox ml-2'
+          onChange={() => setShowPassword(!showPassword)}
+        ></input>
+      </label>
 
       <button className='btn btn-primary w-full'>Sign Up</button>
     </form>

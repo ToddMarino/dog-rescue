@@ -82,10 +82,7 @@ const Navigation = () => {
           {isAuthenticated && (
             <button
               className='btn ml-2'
-              onClick={() => {
-                localStorage.removeItem('token');
-                navigate('/signin');
-              }}
+              onClick={handleLogout}
             >
               Logout
             </button>
