@@ -1,0 +1,94 @@
+import { Link } from 'react-router-dom';
+
+const Navigation = () => {
+  return (
+    <div className='max-lg:collapse bg-base-200 shadow-sm w-full rounded-md'>
+      {/* toggle button on smaller screens */}
+      <input
+        type='checkbox'
+        id='navbar-1-toggle'
+        className='peer hidden lg:hidden'
+      />
+      {/* main navbar */}
+      <div className='collapse-title navbar pr-6'>
+        <div className='navbar-start'>
+          <label htmlFor='navbar-1-toggle' className='btn btn-ghost lg:hidden'>
+            <svg
+              xmlns='http://www.w3.org/2000/svg'
+              className='h-5 w-5'
+              fill='none'
+              viewBox='0 0 24 24'
+              stroke='currentColor'
+            >
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth='2'
+                d='M4 6h16M4 12h8m-8 6h16'
+              />
+            </svg>
+          </label>
+          <p className='text-xl'>
+            <Link to='/'>Dog Rescue</Link>
+          </p>
+        </div>
+        {/* links for large screens and above */}
+        <div className='navbar-center hidden lg:flex'>
+          <ul className='menu menu-horizontal px-1'>
+            <li>
+              <Link to='/dogs'>Dogs</Link>
+            </li>
+            <li>
+              <Link to='/foster'>Foster</Link>
+            </li>
+            <li>
+              <Link to='/adopt'>Adopt</Link>
+            </li>
+            <li>
+              <Link to='/volunteer'>Volunteer</Link>
+            </li>
+            <li>
+              <Link to='/events'>Events & News</Link>
+            </li>
+          </ul>
+        </div>
+        {/* buttons to sign-up or sign in */}
+        <div className='navbar-end'>
+          <button>
+            <Link to='/auth/signup' className='btn'>
+              Sign Up
+            </Link>
+          </button>
+          <button>
+            <Link to='/auth/signin' className='btn ml-2'>
+              Sign In
+            </Link>
+          </button>
+        </div>
+      </div>
+
+      {/* collapsable menu */}
+      <div className='collapse-content lg:hidden z-1'>
+        <ul className='menu'>
+          <li>
+            <Link to='/dogs'>Dogs</Link>
+          </li>
+          <li>
+            <Link to='/foster'>Foster</Link>
+          </li>
+          <li>
+            <Link to='/adopt'>Adopt</Link>
+          </li>
+          <li>
+            <Link to='/volunteer'>Volunteer</Link>
+          </li>
+          <li>
+            <Link to='/events'>Events & News</Link>
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default Navigation;
