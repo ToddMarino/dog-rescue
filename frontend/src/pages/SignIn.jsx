@@ -1,13 +1,25 @@
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import {useAuth} from '../context/AuthContext'
+import api from '../api/axios';
+
 
 const SignIn = () => {
+  const navigate = useNavigate();
+  
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
+  
+  const { login } = useAuth();
 
-  const onSubmit = (data) => console.log('Form submitted: ', data);
+  const onSubmit = async (data) => {
+    const res = await api.post('/auth/login', data);
+    login(res.data.token);
+    navigate('/');
+  }
 
   return (
     <form

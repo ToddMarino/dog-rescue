@@ -1,6 +1,15 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Navigation = () => {
+  const { isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/signin');
+  };
+
   return (
     <div className='max-lg:collapse bg-base-200 shadow-sm w-full rounded-md'>
       {/* toggle button on smaller screens */}
@@ -50,20 +59,37 @@ const Navigation = () => {
             <li>
               <Link to='/events'>Events & News</Link>
             </li>
+
+            {/* ToDo */}
+            {/* If user is admin, display links for create dog, assign roles, etc */}
           </ul>
         </div>
-        {/* buttons to sign-up or sign in */}
+
+        {/*   If the user is not authenticated, show links to signup or sign in */}
         <div className='navbar-end'>
-          <button>
-            <Link to='/auth/signup' className='btn'>
-              Sign Up
-            </Link>
-          </button>
-          <button>
-            <Link to='/auth/signin' className='btn ml-2'>
-              Sign In
-            </Link>
-          </button>
+          {!isAuthenticated && (
+            <>
+              <Link to='/signup' className='btn'>
+                Sign Up
+              </Link>
+              <Link to='/signin' className='btn ml-2'>
+                Sign In
+              </Link>
+            </>
+          )}
+
+          {/*   If the user is authenticated, show link to logout */}
+          {isAuthenticated && (
+            <button
+              className='btn ml-2'
+              onClick={() => {
+                localStorage.removeItem('token');
+                navigate('/signin');
+              }}
+            >
+              Logout
+            </button>
+          )}
         </div>
       </div>
 

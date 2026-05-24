@@ -1,13 +1,30 @@
 import { useForm } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
+import api from '../api/axios';
 
 const SignUp = () => {
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => console.log('Form submitted: ', data);
+  const onSubmit = async (data) => {
+    try {
+      await api.post('/auth/signup', {
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+      });
+
+      navigate('/signin');
+    } catch (err) {
+      console.error('Signup failed:', err);
+    }
+  };
 
   return (
     <form
@@ -24,12 +41,19 @@ const SignUp = () => {
           type='email'
           id='email'
           className=' input input-bordered w-full'
-          {...register('email', { required: 'Email is required' })}
+          {...register('email', {
+            required: 'Email is required',
+            pattern: {
+              value: /\S+@\S+\.\S+/,
+              message: 'Invalid email format',
+            },
+          })}
         />
         {errors.email && (
           <p className='text-red-500 text-sm mt-1'>{errors.email.message}</p>
         )}
       </div>
+
       {/* Password */}
       <div className='form-control flex flex-col'>
         <label htmlFor='password' className='label'>
@@ -45,6 +69,7 @@ const SignUp = () => {
           <p className='text-red-500 text-sm mt-1'>{errors.password.message}</p>
         )}
       </div>
+
       {/* Confirm Password */}
       <div className='form-control flex flex-col'>
         <label htmlFor='confirmPassword' className='label'>
@@ -54,7 +79,13 @@ const SignUp = () => {
           type='password'
           id='confirmPassword'
           className=' input input-bordered w-full'
-          {...register('confirmPassword', { required: 'Password is required' })}
+          {...register('confirmPassword', {
+            required: 'Password is required',
+            validate: (value) => {
+              // eslint-disable-next-line react-hooks/incompatible-library
+              return value === watch('password') || 'Passwords do not match';
+            },
+          })}
         />
         {errors.confirmPassword && (
           <p className='text-red-500 text-sm mt-1'>
@@ -63,7 +94,7 @@ const SignUp = () => {
         )}
       </div>
 
-      <button className="btn btn-primary w-full">Sign Up</button>
+      <button className='btn btn-primary w-full'>Sign Up</button>
     </form>
   );
 };
