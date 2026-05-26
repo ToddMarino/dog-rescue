@@ -1,28 +1,35 @@
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
+import { useGlobalData } from '../context/GlobalDataContext';
 
 const CreateDog = () => {
-  useEffect(() => {
-    loadBreeds;
-  }, []);
-
-  const loadBreeds = async () => {
-    try {
-      const breeds = await fetch();
-    } catch (err) {
-      console.error('Error fetching breeds', err);
-    }
-  };
-
   const {
     register,
+    control,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm();
 
+  const {
+    breeds,
+    genders,
+    intakeTypes,
+    approvalTypes,
+    behaviorTags,
+    locationTypes,
+    roleTypes,
+    sizes,
+    states,
+    statuses,
+    isLoading,
+    error,
+  } = useGlobalData();
+
   const onSubmit = (data) => console.log('Form Submitted: ', data);
+
+  if (isLoading) return <p>Loading reference data ...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <div>
@@ -105,66 +112,25 @@ const CreateDog = () => {
         </div>
         {/* Dog Breed */}
         {/* Select Input */}
-
-        <button
-          type='button'
-          className='btn'
-          popoverTarget='breeds'
-          className='w-full bg-slate-300 py-3 shadow-sm'
-          style={{ anchorName: '--anchor-1' }}
-        >
-          Select a Breed or Breeds
-        </button>
-        <ul
-          className='dropdown menu bg-white max-w-fit rounded-box shadow-sm'
-          popover='auto'
-          id='breeds'
-          style={{ positionAnchor: '--anchor-1' }}
-        >
-          <li>
-            <label htmlFor=''>
-              <input type='checkbox' name='' id='' /> First Breed
-            </label>
-          </li>
-          <li>
-            <label htmlFor=''>
-              <input type='checkbox' name='' id='' /> First Breed
-            </label>
-          </li>
-          <li>
-            <label htmlFor=''>
-              <input type='checkbox' name='' id='' /> First Breed
-            </label>
-          </li>
-          <li>
-            <label htmlFor=''>
-              <input type='checkbox' name='' id='' /> First Breed
-            </label>
-          </li>
-        </ul>
-        {/* Select Input
         <div className='form-control flex flex-col'>
-          <label htmlFor='breed' className='label'>
-            <span className='label-text'>Breed</span>
+          <label htmlFor='breeds' className='label'>
+            <span className='label-text'>Breeds</span>
           </label>
-          <select
-            multiple
-            name='breed'
-            id='breed'
-            className='input py-2 h-28 '
-            {...register('breed', {
-              required: 'At least one breed is required',
-            })}
-          >
-            <option className='py-1' value='1'>Male</option>
-            <option className='py-1' value='2'>Female</option>
-            <option className='py-1' value='3'>Unknown</option>
-          </select>
-          {errors.name && (
-            <p className='text-red-500 text-sm mt-1'>{errors.breed.message}</p>
-          )}
-        </div> 
-        */}
+          <Controller
+            name='breeds'
+            control={control}
+            rules={{ required: 'At least one breed is required' }}
+            render={({ field }) => (
+              <Select
+                {...field}
+                options={breeds}
+                isMulti
+                placeholder="Select or type one or more breeds"
+                className='text-black'
+              />
+            )}
+          />
+        </div>
         {/* Gender */}
         {/* Will need to fetch data */}
         <div className='form-control flex flex-col'>
