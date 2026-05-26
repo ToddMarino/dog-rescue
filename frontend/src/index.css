@@ -1,0 +1,10 @@
+:root {
+  --light-blue: oklch(72.664% 0.12468 240.589);
+  --ochre: #edae53;
+  --blue-gray: #5d676e;
+  --blue-white: #edf2f5;
+}
+
+/* body {
+  background-color: var(--ocher);
+} */

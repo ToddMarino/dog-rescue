@@ -1,2 +1,11 @@
 @import 'tailwindcss';
 @plugin "daisyui";
+
+
+@theme {
+  --color-light-blue: oklch(72.664% 0.12468 240.589);
+}
+
+/* body {
+  background-color: var(--color-light-blue);
+} */
