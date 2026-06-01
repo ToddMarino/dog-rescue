@@ -9,24 +9,31 @@ const CreateDog = () => {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      behaviorTags: [],
+    },
+  });
 
   const {
     breeds,
     genders,
     intakeTypes,
-    approvalTypes,
     behaviorTags,
     locationTypes,
-    roleTypes,
     sizes,
-    states,
     statuses,
     isLoading,
     error,
   } = useGlobalData();
 
-  const onSubmit = (data) => console.log('Form Submitted: ', data);
+  const onSubmit = (data) => {
+    const payload = {
+      ...data,
+      behaviorTags: data.behaviorTags?.map((tag) => tag.value) || [],
+    };
+    console.log('Form Submitted: ', payload);
+  };
 
   if (isLoading) return <p>Loading reference data ...</p>;
   if (error) return <p>{error}</p>;
@@ -40,7 +47,7 @@ const CreateDog = () => {
       >
         <div className='flex flex-col gap-4 md:flex-row'>
           {/* Intake Date */}
-          <div className='form-control flex flex-col flex-1'>
+          <div className='form-control flex flex-col flex-1 gap-1'>
             <label htmlFor='intakeDate' className='label'>
               <span className='label-text'>Intake Date</span>
             </label>
@@ -54,35 +61,64 @@ const CreateDog = () => {
               })}
             />
           </div>
+
           {/* Intake Type */}
-          <div className='form-control flex flex-col flex-1'>
-            <label htmlFor='intakeType'>
+          <div className='form-control flex flex-col flex-1 gap-1'>
+            <label htmlFor='intakeTypes' className='label'>
               <span className='label-text'>Intake Type</span>
             </label>
-            <select
-              name='intakeType'
-              id='intakeType'
-              className='input'
-              {...register('intakeType', {
-                required: 'Please choose an intake type',
-              })}
-            >
-              <option value=''>Choose a value</option>
-              <option value='1'>Stray</option>
-              <option value='2'>Surrender</option>
-              <option value='3'>Adoption Return</option>
-              <option value='4'>Agency Transfer</option>
-              <option value='5'>Other</option>
-            </select>
-            {errors.intakeType && (
-              <p className='text-red-500 text-sm mt-1'>
-                {errors.intakeType.message}
-              </p>
-            )}
+            <Controller
+              name='intakeTypes'
+              control={control}
+              rules={{ required: 'One type must be selected' }}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={intakeTypes}
+                  className='text-black'
+                />
+              )}
+            />
           </div>
         </div>
+
+        <div className='flex flex-col gap-4 md:flex-row'>
+          {/* Current Location */}
+          <div className='form-control flex flex-col flex-1 gap-1'>
+            <label htmlFor='locationTypes' className='label'>
+              <span className='label-text'>Location Type</span>
+            </label>
+            <Controller
+              name='locationTypes'
+              control={control}
+              rules={{ required: 'One type must be selected' }}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={locationTypes}
+                  className='text-black'
+                />
+              )}
+            />
+          </div>
+          {/* Current Status */}
+          <div className='form-control flex flex-col flex-1 gap-1'>
+            <label htmlFor='statuses' className='label'>
+              <span className='label-text'>Status</span>
+            </label>
+            <Controller
+              name='statuses'
+              control={control}
+              rules={{ required: 'One type must be selected' }}
+              render={({ field }) => (
+                <Select {...field} options={statuses} className='text-black' />
+              )}
+            />
+          </div>
+        </div>
+
         {/* Microchip Number */}
-        <div className='form-control flex flex-col'>
+        <div className='form-control flex flex-col gap-1'>
           <label htmlFor='microchip' className='label'>
             <span className='label-text'>Microchip Number</span>
           </label>
@@ -96,7 +132,7 @@ const CreateDog = () => {
         </div>
 
         {/* Name */}
-        <div className='form-control flex flex-col'>
+        <div className='form-control flex flex-col gap-1'>
           <label htmlFor='name' className='label'>
             <span className='label-text'>Name</span>
           </label>
@@ -110,9 +146,9 @@ const CreateDog = () => {
             <p className='text-red-500 text-sm mt-1'>{errors.name.message}</p>
           )}
         </div>
+
         {/* Dog Breed */}
-        {/* Select Input */}
-        <div className='form-control flex flex-col'>
+        <div className='form-control flex flex-col gap-1'>
           <label htmlFor='breeds' className='label'>
             <span className='label-text'>Breeds</span>
           </label>
@@ -125,33 +161,163 @@ const CreateDog = () => {
                 {...field}
                 options={breeds}
                 isMulti
-                placeholder="Select or type one or more breeds"
+                placeholder='Select or type one or more breeds'
                 className='text-black'
               />
             )}
           />
         </div>
+
         {/* Gender */}
-        {/* Will need to fetch data */}
-        <div className='form-control flex flex-col'>
+        <div className='form-control flex flex-col gap-1'>
           <label htmlFor='gender' className='label'>
             <span className='label-text'>Gender</span>
           </label>
-          <select
+          <Controller
             name='gender'
-            id='gender'
-            className='input'
-            {...register('gender', { required: 'A gender is required' })}
-          >
-            <option value=''>choose a gender</option>
-            <option value='1'>Male</option>
-            <option value='2'>Female</option>
-            <option value='3'>Unknown</option>
-          </select>
-          {errors.name && (
-            <p className='text-red-500 text-sm mt-1'>{errors.gender.message}</p>
-          )}
+            control={control}
+            rules={{ required: 'A gender is required' }}
+            render={({ field }) => (
+              <Select {...field} options={genders} className='text-black' />
+            )}
+          />
         </div>
+
+        <div className='form-control flex gap-20'>
+          {/* UTD Shots */}
+          <div>
+            <label htmlFor='utd_Shots' className='label'>
+              <span className='label-text'>UTD Shots</span>
+            </label>
+            <Controller
+              name='utd_shots'
+              control={control}
+              defaultValue={false}
+              render={({ field }) => (
+                <label className='flex items-center gap-2'>
+                  <input
+                    type='checkbox'
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                    className='checkbox'
+                  />
+                  Yes
+                </label>
+              )}
+            />
+          </div>
+          {/* Fixed */}
+          <div>
+            <label htmlFor='fixed' className='label'>
+              <span className='label-text'>Fixed</span>
+            </label>
+            <Controller
+              name='fixed'
+              control={control}
+              defaultValue={false}
+              render={({ field }) => (
+                <label className='flex items-center gap-2'>
+                  <input
+                    type='checkbox'
+                    checked={field.value}
+                    onChange={(e) => field.onChange(e.target.checked)}
+                    className='checkbox'
+                  />
+                  Yes
+                </label>
+              )}
+            />
+          </div>
+        </div>
+
+        <div className='flex flex-col gap-4 md:flex-row'>
+          {/* Size */}
+          <div className='form-control flex flex-col flex-1 gap-1'>
+            <label htmlFor='size' className='label'>
+              <span className='label-text'>Size</span>
+            </label>
+            <Controller
+              name='size'
+              control={control}
+              rules={{ required: 'A size is required' }}
+              render={({ field }) => (
+                <Select {...field} options={sizes} className='text-black' />
+              )}
+            />
+          </div>
+          {/* Weight */}
+          <div className='form-control flex flex-col flex-1 gap-1'>
+            <label htmlFor='weight' className='label'>
+              <span className='label-text'>Weight in Pounds</span>
+            </label>
+            <input
+              type='number'
+              min='1'
+              max='200'
+              name='weight'
+              id='weight'
+              className='input'
+            />
+          </div>
+        </div>
+
+        {/* DOB */}
+        <div className='form-control flex flex-col gap-1'>
+          <label htmlFor='dob' className='label'>
+            <span className='label-text'>Date of Birth</span>
+          </label>
+          <input
+            type='date'
+            name='dob'
+            id='dob'
+            className='p-2 input input-bordered'
+          />
+        </div>
+
+        {/* Behaviors */}
+        <div className='form-control flex flex-col gap-1'>
+          <label htmlFor='behaviorTags' className='label'>
+            <span className='label-text'>Behaviors</span>
+          </label>
+          <Controller
+            name='behaviorTags'
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                options={behaviorTags}
+                isMulti
+                placeholder='Select known behavior tags'
+                className='text-black'
+              />
+            )}
+          />
+        </div>
+
+        {/* Intake Notes */}
+        <div className='form-control flex flex-col gap-1'>
+          <label htmlFor='intake_notes' className='label'>
+            <span className='label-text'>Intake Notes</span>
+          </label>
+          <textarea name="intake_notes" id="intake_notes" className='input p-2 w-full h-max' rows={5}/>
+        </div>
+
+        {/* Medical Notes */}
+        <div className='form-control flex flex-col gap-1'>
+          <label htmlFor='medical_notes' className='label'>
+            <span className='label-text'>Medical Notes</span>
+          </label>
+          <textarea name="medical_notes" id="medical_notes" className='input p-2 w-full h-max' rows={5}/>
+        </div>
+
+        {/* Foster Notes */}
+        <div className='form-control flex flex-col gap-1'>
+          <label htmlFor='foster_notes' className='label'>
+            <span className='label-text'>Foster Notes</span>
+          </label>
+          <textarea name="foster_notes" id="foster_notes" className='input p-2 w-full h-max' rows={5}/>
+        </div>
+
         {/* submit & reset button */}
         <div className='flex gap-3'>
           <button
