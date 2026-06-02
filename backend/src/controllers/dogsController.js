@@ -66,7 +66,7 @@ export const createDog = async (req, res) => {
     // ------------------------------------------------------------
     // 2) Extract all fields from the request body.
     //    These come directly from the frontend form.
-    //    "breeds" and "behavior_tags" are arrays.
+    //    "breeds" and "behaviorTags" are arrays.
     // ------------------------------------------------------------
     const {
       name,
@@ -79,10 +79,13 @@ export const createDog = async (req, res) => {
       weight,
       microchip_number,
       intake_date,
-      estimated_age_years,
-      estimated_age_months,
+      intake_notes,
+      medical_notes,
+      foster_notes,
       breeds,
-      behavior_tags,
+      behaviorTags,
+      utd_shots,
+      fixed
     } = req.body;
 
     // ------------------------------------------------------------
@@ -102,8 +105,11 @@ export const createDog = async (req, res) => {
       weight,
       microchip_number,
       intake_date,
-      estimated_age_years,
-      estimated_age_months,
+      intake_notes,
+      medical_notes,
+      foster_notes,
+      utd_shots,
+      fixed
     ]);
 
     // The newly created dog's primary key.
@@ -119,11 +125,11 @@ export const createDog = async (req, res) => {
     //    If breeds is empty or missing, nothing happens.
     // ------------------------------------------------------------
     if (Array.isArray(breeds)) {
-      for (const breed of breeds) {
+      for (const breedId of breeds) {
         await client.query(
-          `INSERT INTO dog_breeds (dog_id, breed_id, primary_breed)
-           VALUES ($1, $2, $3)`,
-          [dogId, breed.breed_id, breed.primary_breed],
+          `INSERT INTO dog_breeds (dog_id, breed_id)
+           VALUES ($1, $2)`,
+          [dogId, breedId],
         );
       }
     }
@@ -135,12 +141,12 @@ export const createDog = async (req, res) => {
     //
     //    Same pattern as breeds: loop and insert.
     // ------------------------------------------------------------
-    if (Array.isArray(behavior_tags)) {
-      for (const tag of behavior_tags) {
+    if (Array.isArray(behaviorTags)) {
+      for (const tag of behaviorTags) {
         await client.query(
           `INSERT INTO behavior (dog_id, tag_id)
            VALUES ($1, $2)`,
-          [dogId, tag.tag_id],
+          [dogId, tagId],
         );
       }
     }
@@ -211,10 +217,13 @@ export const updateDog = async (req, res) => {
       weight,
       microchip_number,
       intake_date,
-      estimated_age_years,
-      estimated_age_months,
+      intake_notes,
+      medical_notes,
+      foster_notes,
       breeds,
       behavior_tags,
+      utd_shots,
+      fixed
     } = req.body;
 
     // STEP 1: Build dynamic UPDATE for dogs table
@@ -262,13 +271,25 @@ export const updateDog = async (req, res) => {
       fields.push(`intake_date = $${index++}`);
       values.push(intake_date);
     }
-    if (estimated_age_years !== undefined) {
-      fields.push(`estimated_age_years = $${index++}`);
-      values.push(estimated_age_years);
+    if (intake_notes !== undefined) {
+      fields.push(`intake_notes = $${index++}`);
+      values.push(intake_notes);
     }
-    if (estimated_age_months !== undefined) {
-      fields.push(`estimated_age_months = $${index++}`);
-      values.push(estimated_age_months);
+    if (medical_notes !== undefined) {
+      fields.push(`medical_notes = $${index++}`);
+      values.push(medical_notes);
+    }
+    if (foster_notes !== undefined) {
+      fields.push(`foster_notes = $${index++}`);
+      values.push(foster_notes);
+    }
+    if (utd_shots !== undefined) {
+      fields.push(`utd_shots = $${index++}`);
+      values.push(utd_shots);
+    }
+    if (fixed !== undefined) {
+      fields.push(`fixed = $${index++}`);
+      values.push(fixed);
     }
 
     // Only run UPDATE if fields were provided
@@ -288,9 +309,9 @@ export const updateDog = async (req, res) => {
 
       for (const breed of breeds) {
         await client.query(
-          `INSERT INTO dog_breeds (dog_id, breed_id, primary_breed)
-          VALUES ($1, $2, $3)`,
-          [id, breed.breed_id, breed.primary_breed],
+          `INSERT INTO dog_breeds (dog_id, breed_id)
+          VALUES ($1, $2)`,
+          [id, breed.breed_id],
         );
       }
     }

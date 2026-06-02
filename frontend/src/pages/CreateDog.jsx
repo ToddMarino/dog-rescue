@@ -1,6 +1,7 @@
 import { Controller, useForm } from 'react-hook-form';
 import Select from 'react-select';
 import { useGlobalData } from '../context/GlobalDataContext';
+import { getSignedUploadUrl, uploadFileToR2 } from '../api/photos';
 
 const CreateDog = () => {
   const {
@@ -27,12 +28,74 @@ const CreateDog = () => {
     error,
   } = useGlobalData();
 
-  const onSubmit = (data) => {
-    const payload = {
-      ...data,
-      behaviorTags: data.behaviorTags?.map((tag) => tag.value) || [],
-    };
-    console.log('Form Submitted: ', payload);
+  const handlePhotoupload = async (file) => {
+    const { uploadUrl, finalUrl } = await getSignedUploadUrl(file);
+
+    await uploadFileToR2(uploadUrl, file);
+
+    return finalUrl;
+  };
+
+  const onSubmit = async (data) => {
+    try {
+      // 1) get the file from the file input
+      const file = data.photoFile;
+      let photoUrl = null;
+
+      // 2) If a file was selected, upload it to R2
+      if (file && file.length > 0) {
+        const selectedFile = file[0];
+
+        // A. ask the backend for signed URL
+        const { uploadUrl, finalUrl } = await getSignedUploadUrl(selectedFile);
+
+        // B. upload file directly to R2
+        await uploadFileToR2(uploadUrl, selectedFile);
+
+        // C. store final public URL
+        photoUrl = finalUrl;
+      }
+
+      // 3) Normalize & Build the dog payload
+      const dogPayload = {
+        // input fields
+        name: data.name,
+        microchip_number: data.microchipNumber || null,
+        date_of_birth: data.dob || null,
+        weight: data.weight ? Number(data.weight) : null,
+        intake_notes: data.intake_notes || null,
+        medical_notes: data.medical_notes || null,
+        foster_notes: data.foster_notes || null,
+        utd_shots: data.utd_shots || false,
+        fixed: data.fixed || false,
+
+        // select fields
+        gender_id: data.gender?.value || null,
+        size_id: data.size?.value || null,
+        status_id: data.statuses?.value || null,
+        intake_type_id: data.intakeTypes?.value || null,
+        current_location_id: data.loocationTypes?.value || null,
+
+        // breeds
+        breeds: data.breeds?.map(b => b.value) || [],
+
+        // behavior tags
+        behaviorTags: data.behaviorTags.map(t => t.value) || [],
+
+        // photo
+      };
+
+      // 4) Send to the backend
+      await fetch('http://localhost:5000/dogs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dogPayload),
+      });
+
+      console.log('Dog created successfully: ', dogPayload);
+    } catch (err) {
+      console.error('Error creating dog: ', err);
+    }
   };
 
   if (isLoading) return <p>Loading reference data ...</p>;
@@ -299,7 +362,12 @@ const CreateDog = () => {
           <label htmlFor='intake_notes' className='label'>
             <span className='label-text'>Intake Notes</span>
           </label>
-          <textarea name="intake_notes" id="intake_notes" className='input p-2 w-full h-max' rows={5}/>
+          <textarea
+            name='intake_notes'
+            id='intake_notes'
+            className='input p-2 w-full h-max'
+            rows={5}
+          />
         </div>
 
         {/* Medical Notes */}
@@ -307,7 +375,12 @@ const CreateDog = () => {
           <label htmlFor='medical_notes' className='label'>
             <span className='label-text'>Medical Notes</span>
           </label>
-          <textarea name="medical_notes" id="medical_notes" className='input p-2 w-full h-max' rows={5}/>
+          <textarea
+            name='medical_notes'
+            id='medical_notes'
+            className='input p-2 w-full h-max'
+            rows={5}
+          />
         </div>
 
         {/* Foster Notes */}
@@ -315,7 +388,28 @@ const CreateDog = () => {
           <label htmlFor='foster_notes' className='label'>
             <span className='label-text'>Foster Notes</span>
           </label>
-          <textarea name="foster_notes" id="foster_notes" className='input p-2 w-full h-max' rows={5}/>
+          <textarea
+            name='foster_notes'
+            id='foster_notes'
+            className='input p-2 w-full h-max'
+            rows={5}
+          />
+        </div>
+
+        {/* Photo Upload */}
+        <div className='form-control flex flex-col gap-1'>
+          <label htmlFor='photoUpload' className='label'>
+            <span className='label-text'>Upload Photo</span>
+          </label>
+          <input
+            type='file'
+            name='photoUpload'
+            id='photoUpload'
+            accept='image/*'
+            {...register('photoFile')}
+            className='cursor-pointer p-2 border text-sm rounded block w-full'
+          />
+          <p className='text-sm'>Photos must be jpg, jpeg, or png only</p>
         </div>
 
         {/* submit & reset button */}

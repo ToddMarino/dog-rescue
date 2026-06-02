@@ -16,7 +16,8 @@ import roleTypesRoutes from './routes/roleTypesRoutes.js';
 import sizesRoutes from './routes/sizesRoutes.js';
 import statesRoutes from './routes/statesRoutes.js';
 import statusesRoutes from './routes/statusesRoutes.js';
-import photosRoutes from './routes/photosRoutes.js'
+import photosRoutes from './routes/photosRoutes.js';
+import dogPhotosRoutes from './routes/dogPhotosRoutes.js';
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use('/role-types', roleTypesRoutes);
 app.use('/sizes', sizesRoutes);
 app.use('/states', statesRoutes);
 app.use('/statuses', statusesRoutes);
-app.use('/photos', photosRoutes)
+app.use('/photos', photosRoutes);
+app.use('/dog-photos', dogPhotosRoutes);
 
 app.listen(5000, () => console.log('Server running on port 5000'));

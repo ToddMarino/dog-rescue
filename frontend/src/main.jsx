@@ -14,6 +14,7 @@ import Events from './pages/Events.jsx';
 import SignUp from './pages/SignUp.jsx';
 import SignIn from './pages/SignIn.jsx';
 import CreateDog from './pages/CreateDog.jsx';
+import MissingPage from './pages/MissingPage.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -33,6 +34,7 @@ createRoot(document.getElementById('root')).render(
               <Route path='/signin' element={<SignIn />} />
               {/* Protected Routes Below */}
               <Route path='/admin/createdog' element={<CreateDog />} />
+              <Route path='*' element={<MissingPage />} />
             </Route>
           </Routes>
         </GlobalDataProvider>

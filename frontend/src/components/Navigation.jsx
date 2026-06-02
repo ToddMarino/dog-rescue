@@ -1,8 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useState } from 'react';
 
 const Navigation = () => {
   const { isAuthenticated, logout } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -17,6 +19,8 @@ const Navigation = () => {
         type='checkbox'
         id='navbar-1-toggle'
         className='peer hidden lg:hidden'
+        checked={isOpen}
+        onChange={() => setIsOpen(!isOpen)}
       />
       {/* main navbar */}
       <div className='collapse-title navbar pr-6'>
@@ -94,22 +98,22 @@ const Navigation = () => {
       <div className='collapse-content lg:hidden z-1'>
         <ul className='menu'>
           <li>
-            <Link to='/dogs'>Dogs</Link>
+            <Link to='/dogs' onClick={() => setIsOpen(false)}>Dogs</Link>
           </li>
           <li>
-            <Link to='/foster'>Foster</Link>
+            <Link to='/foster' onClick={() => setIsOpen(false)}>Foster</Link>
           </li>
           <li>
-            <Link to='/adopt'>Adopt</Link>
+            <Link to='/adopt' onClick={() => setIsOpen(false)}>Adopt</Link>
           </li>
           <li>
-            <Link to='/volunteer'>Volunteer</Link>
+            <Link to='/volunteer' onClick={() => setIsOpen(false)}>Volunteer</Link>
           </li>
           <li>
-            <Link to='/events'>Events & News</Link>
+            <Link to='/events' onClick={() => setIsOpen(false)}>Events & News</Link>
           </li>
           <li>
-            <Link to='/admin/createdog'>Create Dog Form</Link>
+            <Link to='/admin/createdog' onClick={() => setIsOpen(false)}>Create Dog Form</Link>
           </li>
         </ul>
       </div>
